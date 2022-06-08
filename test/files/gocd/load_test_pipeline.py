@@ -8,11 +8,10 @@ def backup_cruise_config(config_file):
     and creates a backup.
     """
     config_backup_path = os.path.join(os.path.dirname(config_file.name), "cruise-config.xml.bak")
-    config_backup_file = open(config_backup_path, "w")
-    config_backup_file.seek(0)
-    config_backup_file.write(config_file.read())
-    config_backup_file.truncate()
-    config_backup_file.close()
+    with open(config_backup_path, "w") as config_backup_file:
+        config_backup_file.seek(0)
+        config_backup_file.write(config_file.read())
+        config_backup_file.truncate()
 
 def update_cruise_config(config_file, pipeline_file):
     """
@@ -45,16 +44,18 @@ def write_cruise_config(config_path, config):
     Outputs the new configuration to the cruise-config.xml
     file.
     """
-    config_file = open(config_path, "w")
-    config_file.seek(0)
-    config_file.write(config.prettify())
-    config_file.truncate()
-    config_file.close()
+    with open(config_path, "w") as config_file:
+        config_file.seek(0)
+        config_file.write(config.prettify())
+        config_file.truncate()
 
 if __name__ == '__main__':
 
     # Get command line arguements
-    assert len(sys.argv)==2, "Please provide the pipeline XML file to load (and no other arguments): %s" % sys.argv[1:]
+    assert (
+        len(sys.argv) == 2
+    ), f"Please provide the pipeline XML file to load (and no other arguments): {sys.argv[1:]}"
+
     pipeline_xml_file = sys.argv[1]
 
     # Determine file paths
@@ -62,18 +63,15 @@ if __name__ == '__main__':
     config_path = os.path.join(os.getenv("GOCD_CONFIG_PATH", "/tmp"), "cruise-config.xml")
     pipeline_path = os.path.join(script_path, pipeline_xml_file)
 
-    # Open destination and source files, respectively
-    config_file = open(config_path, "r")
-    pipeline_file = open(pipeline_path, "r")
+    with open(config_path, "r") as config_file:
+        pipeline_file = open(pipeline_path, "r")
 
-    # Backup config_xml file
-    backup_cruise_config(config_file)
+        # Backup config_xml file
+        backup_cruise_config(config_file)
 
-    # Parse the config and pipeline files, then create a new pipeline group and insert the pipeline
-    updated_config = update_cruise_config(config_file, pipeline_file)
+        # Parse the config and pipeline files, then create a new pipeline group and insert the pipeline
+        updated_config = update_cruise_config(config_file, pipeline_file)
 
-    # Close our input files
-    config_file.close()
     pipeline_file.close()
 
     # Output the modified contents

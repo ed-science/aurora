@@ -135,8 +135,12 @@ def main():
         "port":"port",
         "db":"database"
     }
-    kw = dict( (params_map[k], v) for (k, v) in module.params.items()
-              if k in params_map and v != "" )
+    kw = {
+        params_map[k]: v
+        for (k, v) in module.params.items()
+        if k in params_map and v != ""
+    }
+
 
     # If a login_unix_socket is specified, incorporate it here.
     is_localhost = "host" not in kw or kw["host"] == "" or kw["host"] == "localhost"
@@ -149,7 +153,7 @@ def main():
             db_connection.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
         cursor = db_connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
     except Exception as e:
-        module.fail_json(msg="unable to connect to database: %s" % e)
+        module.fail_json(msg=f"unable to connect to database: {e}")
 
     kw = dict(script=script)
 
